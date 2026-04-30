@@ -45,7 +45,10 @@ export class UsersService {
 				name: profile.name,
 				avatar: profile.avatar,
 				phone: account.phone,
-				email: account.email
+				email: account.email,
+				...(profile.stripeAccountId && {
+					stripeAccountId: profile.stripeAccountId
+				})
 			}
 		}
 	}
@@ -61,7 +64,7 @@ export class UsersService {
 	}
 
 	async patchUser(data: PatchUserRequest) {
-		const { userId, name } = data
+		const { userId, name, stripeAccountId } = data
 		this.logger.info(`PatchUser requested: userId=${userId}`)
 
 		const user = await this.usersRepository.findById(userId)
@@ -73,7 +76,8 @@ export class UsersService {
 			})
 
 		await this.usersRepository.update(user.id, {
-			...(name !== undefined && { name })
+			...(name !== undefined && { name }),
+			...(stripeAccountId !== undefined && { stripeAccountId })
 		})
 
 		this.logger.info(`PatchUser completed: userId=${userId}`)

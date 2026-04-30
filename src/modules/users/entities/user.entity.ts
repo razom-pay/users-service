@@ -12,6 +12,14 @@ export class UserEntity {
 	@Column({ type: 'varchar', nullable: true })
 	avatar?: string | null
 
+	@Column({
+		name: 'stripe_account_id',
+		type: 'varchar',
+		nullable: true,
+		unique: true
+	})
+	stripeAccountId?: string | null
+
 	@CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
 	createdAt!: Date
 

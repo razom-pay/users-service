@@ -1,10 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { UsersService } from './users.service'
-import { PinoLogger } from 'nestjs-pino'
-import { UsersRepository } from './users.repository'
-import { AccountClientGrpc } from '../../infra/grpc/clients/account.client'
 import { RpcException } from '@nestjs/microservices'
+import { Test, TestingModule } from '@nestjs/testing'
+import { PinoLogger } from 'nestjs-pino'
 import { of } from 'rxjs'
+
+import { AccountClientGrpc } from '../../infra/grpc/clients/account.client'
+
+import { UsersRepository } from './users.repository'
+import { UsersService } from './users.service'
 
 describe('UsersService', () => {
 	let service: UsersService
@@ -50,7 +52,9 @@ describe('UsersService', () => {
 	describe('getMe', () => {
 		it('should throw NOT_FOUND if user profile is missing', async () => {
 			usersRepository.findById.mockResolvedValue(null)
-			await expect(service.getMe({ id: '1' })).rejects.toThrow(RpcException)
+			await expect(service.getMe({ id: '1' })).rejects.toThrow(
+				RpcException
+			)
 		})
 
 		it('should return user profile combined with account data', async () => {
@@ -100,12 +104,35 @@ describe('UsersService', () => {
 		})
 
 		it('should update user name', async () => {
-			usersRepository.findById.mockResolvedValue({ id: '1', name: 'Old' } as any)
+			usersRepository.findById.mockResolvedValue({
+				id: '1',
+				name: 'Old'
+			} as any)
 			usersRepository.update.mockResolvedValue({} as any)
 
-			const result = await service.patchUser({ userId: '1', name: 'New Name' })
+			const result = await service.patchUser({
+				userId: '1',
+				name: 'New Name'
+			})
 
-			expect(usersRepository.update).toHaveBeenCalledWith('1', { name: 'New Name' })
+			expect(usersRepository.update).toHaveBeenCalledWith('1', {
+				name: 'New Name'
+			})
+			expect(result).toEqual({ ok: true })
+		})
+
+		it('should update stripe account id', async () => {
+			usersRepository.findById.mockResolvedValue({ id: '1' } as any)
+			usersRepository.update.mockResolvedValue({} as any)
+
+			const result = await service.patchUser({
+				userId: '1',
+				stripeAccountId: 'acct_123'
+			})
+
+			expect(usersRepository.update).toHaveBeenCalledWith('1', {
+				stripeAccountId: 'acct_123'
+			})
 			expect(result).toEqual({ ok: true })
 		})
 	})
